@@ -1,15 +1,17 @@
 use std::{future::Future, pin::Pin};
 
-use serenity::all::{CommandInteraction, Context, CreateCommand};
+use poise::serenity_prelude::{CommandInteraction, Context, CreateCommand};
 
 pub mod generic;
 
 pub const DEFAULT_DESCRIPTION_TEXT: &str = "No description provided.";
 
+/// Lists all commands available.
 pub fn list_commands() -> Vec<SlashCommand> {
     vec![generic::ping()]
 }
 
+/// Returns a command with given `name`, if any.
 pub fn find_command(name: impl AsRef<str>) -> Option<SlashCommand> {
     match name.as_ref() {
         "ping" => Some(generic::ping()),
@@ -50,6 +52,9 @@ impl SlashCommand {
             DEFAULT_DESCRIPTION_TEXT
         }
     }
+    /// Calls this command with a given context and interaction.
+    ///
+    /// Returns a future.
     pub fn call_with(
         &self,
         ctx: Context,

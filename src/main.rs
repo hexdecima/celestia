@@ -1,8 +1,8 @@
 use std::env;
 
 use commands::SlashCommand;
-use serenity::{
-    all::{Command, Context, EventHandler, GatewayIntents, Interaction, Ready},
+use poise::serenity_prelude::{
+    Command, Context, EventHandler, GatewayIntents, Interaction, Ready,
     async_trait, Client,
 };
 

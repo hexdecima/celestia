@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 dotenvy = "0.15.7"
-serenity = { version = "0.12.4", features = ["client", "gateway", "http", "framework" ] }
+poise = "0.6.1"
 tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
 
 [profile.release]

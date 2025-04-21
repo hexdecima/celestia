@@ -1,4 +1,4 @@
-use serenity::all::{CreateInteractionResponse, CreateInteractionResponseMessage};
+use poise::serenity_prelude::{CreateInteractionResponse, CreateInteractionResponseMessage};
 
 use super::SlashCommand;
 
