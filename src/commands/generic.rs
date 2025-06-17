@@ -1,21 +1,11 @@
-use poise::serenity_prelude::{CreateInteractionResponse, CreateInteractionResponseMessage};
+use poise::command;
 
-use super::SlashCommand;
+use crate::commands::CommandResult;
 
-pub fn ping() -> SlashCommand {
-    SlashCommand::builder("ping")
-        .with_description("HEARTBEAT PING?")
-        .with_handler(|ctx, cmd| {
-            Box::pin(async move {
-                cmd.create_response(
-                    &ctx.http,
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new().content("Pong."),
-                    ),
-                )
-                .await
-                .expect("failed to respond!");
-            })
-        })
-        .build()
+use super::Context;
+
+#[command(slash_command, description_localized("en-US", "HEARTBEAT PING?"))]
+pub async fn ping(ctx: Context<'_>) -> CommandResult {
+    ctx.say("Pong.").await?;
+    Ok(())
 }

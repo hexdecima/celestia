@@ -1,56 +1,44 @@
-use std::env;
-
-use commands::SlashCommand;
-use poise::serenity_prelude::{
-    Command, Context, EventHandler, GatewayIntents, Interaction, Ready,
-    async_trait, Client,
+use commands::Data;
+use poise::{
+    serenity_prelude::{async_trait, ClientBuilder, Context, EventHandler, GatewayIntents, Ready},
+    Framework, FrameworkOptions,
 };
 
 mod commands;
+mod utils;
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let token = env::var("BOT_TOKEN").expect("Missing 'BOT_TOKEN' environment variable.");
-    let mut client = Client::builder(&token, GatewayIntents::empty())
+    let token = utils::load_token().expect("Failed to load token.");
+
+    let framework = Framework::builder()
+        .options(FrameworkOptions {
+            commands: vec![commands::generic::ping()],
+            ..Default::default()
+        })
+        .setup(|ctx, _, framework| {
+            Box::pin(async move {
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                Ok(Data {})
+            })
+        })
+        .build();
+
+    let mut client = ClientBuilder::new(&token, GatewayIntents::empty())
+        .framework(framework)
         .event_handler(Handler)
         .await
-        .expect("Failed building client.");
-
-    if let Err(e) = client.start().await {
-        println!("ERR: {e:?}");
-    }
+        .unwrap();
+    client.start().await.unwrap();
 }
 
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, ctx: Context, ready: Ready) {
+    async fn ready(&self, _: Context, ready: Ready) {
         println!("Ready as {}.", ready.user.display_name());
-
-        for command in commands::list_commands()
-            .into_iter()
-            .map(SlashCommand::into_create_builder)
-            .collect::<Box<[_]>>()
-        {
-            Command::create_global_command(&ctx.http, command)
-                .await
-                .expect("can't create global command.");
-        }
-    }
-    async fn interaction_create(&self, ctx: Context, int: Interaction) {
-        match int {
-            Interaction::Command(cmd) => {
-                let command = commands::find_command(&cmd.data.name);
-
-                match command {
-                    Some(command) => command.call_with(ctx, cmd).await,
-                    None => (),
-                };
-            }
-            _ => () 
-        }
     }
 }
